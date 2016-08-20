@@ -2,11 +2,10 @@
 'use strict';
 
 var mongoose = require('mongoose'),
-      Schema = mongoose.Schema,
       integerValidator = require('mongoose-integer');
 
 //define review schema
-var ReviewSchema = new Schema({
+var ReviewSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -26,7 +25,7 @@ var ReviewSchema = new Schema({
   review: String
 });
 
-mySchema.plugin(integerValidator);
+ReviewSchema.plugin(integerValidator);
 
 var Review = mongoose.model('Review', ReviewSchema);
 

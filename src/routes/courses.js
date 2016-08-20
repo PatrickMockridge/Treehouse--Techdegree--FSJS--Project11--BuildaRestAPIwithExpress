@@ -48,7 +48,7 @@ router.get('/courses/:id', function (req, res, next) {
   User.populate(req.course, queryParams, function (err, course) {
     if (err) {
       return next(err);
-    };
+    }
     //formats data to be consumed by Angular
     var thisCourse = {};
     thisCourse.data = [];
@@ -86,7 +86,7 @@ router.post('/courses', auth, function (req, res, next) {
           // else send error to error handler
           return next(err);
     }
-  };
+  }
     res.status(201);
     // sets Location header
     res.location('/courses/' + course._id);

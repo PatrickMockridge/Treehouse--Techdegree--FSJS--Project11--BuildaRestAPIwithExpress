@@ -6,10 +6,9 @@ var Validator = require('validator');
 var bcrypt = require('bcrypt');
 //define user schema
 var UserSchema = new mongoose.Schema({
-  _id: {
-    type: mongoose.Schema.Types.ObjectId,
-    default: new ObjectId()
-  },
+  // _id: {
+  //   type: mongoose.Schema.Types.ObjectId
+  // },
   fullName: {
     type: String,
     required: [true, 'Full name is required']
@@ -22,7 +21,7 @@ var UserSchema = new mongoose.Schema({
     type: String,
     required: true
   }
-}
+},
 {
   toObject: { virtuals: true },
   toJSON: { virtuals: true }
@@ -34,8 +33,8 @@ UserSchema.virtual('password')
 })
 .set(function(value) {
   this._password = value;
-  var salt = bcrypt.gen_salt_sync(12);
-  this.hashedPassword = bcrypt.encrypt_sync(value, salt);
+  var salt = bcrypt.genSaltSync(12);
+  this.hashedPassword = bcrypt.hashSync(value, salt);
 });
 
 UserSchema.virtual('confirmPassword')
@@ -48,7 +47,7 @@ UserSchema.virtual('confirmPassword')
 
 UserSchema.path('hashedPassword').validate(function(v) {
   if (this._password || this._confirmPassword) {
-    if (this._password !== this._passwordConfirmation) {
+    if (this._password !== this._confirmPassword) {
       this.invalidate('confirmPassword', 'the password fields must match');
     }
   }

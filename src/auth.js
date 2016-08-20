@@ -4,7 +4,7 @@ var User = require('./models/users');
 var basicAuth = require('basic-auth');
 var bcrypt = require('bcrypt');
 var auth = function (req, res, next) {
-// send unauthorisaed status 
+// send unauthorisaed status
   function unauthorized (res) {
     // res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
     return res.send(401);
@@ -41,3 +41,5 @@ var auth = function (req, res, next) {
     });
   }
 };
+
+module.exports = auth;
