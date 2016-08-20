@@ -36,7 +36,7 @@ UserSchema.virtual('password')
   var salt = bcrypt.genSaltSync(12);
   this.hashedPassword = bcrypt.hashSync(value, salt);
 });
-// create 'confirm password' value in the schema 
+// create 'confirm password' value in the schema
 UserSchema.virtual('confirmPassword')
 .get(function() {
   return this._confirmPassword;
@@ -44,13 +44,14 @@ UserSchema.virtual('confirmPassword')
 .set(function(value) {
   this._confirmPassword = value;
 });
-
+// only accept the password if the confirm password and password match
 UserSchema.path('hashedPassword').validate(function(v) {
   if (this._password || this._confirmPassword) {
     if (this._password !== this._confirmPassword) {
       this.invalidate('confirmPassword', 'the password fields must match');
     }
   }
+  // if no password invalidate 
   if (this.isNew && !this._password) {
     this.invalidate('password', 'a password is required');
   }
