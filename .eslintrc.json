@@ -1,0 +1,19 @@
+{
+    "extends": "standard",
+    "plugins": [
+        "standard"
+    ],
+    "rules": {
+        "semi": ["error", "always"],
+        "require-jsdoc": ["error", {
+            "require": {
+                "FunctionDeclaration": true,
+                "MethodDefinition": true,
+                "ClassDeclaration": true
+            }
+        }]
+    },
+    "env": {
+        "node": true
+    }
+}

@@ -1,0 +1,78 @@
+'use strict';
+var express = require('express');
+var router = express.Router();
+var Course = require('../models/courses');
+var Review = require('../models/reviews');
+var auth = require('../auth.js');
+// post review
+router.post('/courses/:courseId/reviews', auth, function (req, res, next) {
+  // create new review
+  var review = new Review(req.body);
+  review.user = req.user;
+  // find one course with specific course id
+  // return only reviews & usersWhoReviewed
+  Course.findOne({_id: req.params.courseId}, 'reviews usersWhoReviewed', function (err, course) {
+    // if error send to the error handler
+    if (err) { return next(err); }
+      // else push the new review into Course.reviews
+      course.reviews.push(review);
+      // make sure the user cannot write another review
+      course.usersWhoReviewed.push(review.user);
+      // save the course
+      course.save(function (err) {
+        // if error pass to error handler
+        if (err) { return next(err); }
+      });
+      // save the review
+      review.save(function (err) {
+        // if any errors
+        if (err) {
+          // check for validation errors
+          if (err.name === 'ValidationError') {
+            return res.status(400).json({
+              message: 'Validation Failed', errors: { property: [ { code: 400, message: err.errors.rating.message } ] }
+            });
+          } else {
+            // else send error to error handler
+            return next(err);
+          }
+        }
+        // send 201 status
+        res.status(201);
+        // sets Location header
+        res.location('/courses/' + course._id);
+        res.end();
+      });
+  });
+});
+
+// DELETE /api/courses/:courseId/reviews/:id 204 - Deletes the specified review and returns no content
+router.delete('/courses/:courseId/reviews/:id', auth, function (req, res, next) {
+  // remove the review that matches the id in url
+  Review.remove({_id: req.params.id}, function (err) {
+    // if error send to error handler
+    if (err) { return next(err); }
+  });
+  // find specific course that matches course id in url
+  // return only reviews & usersWhoReviewed
+  Course.findOne({_id: req.params.courseId}, 'reviews usersWhoReviewed', function (err, course) {
+    // if error send to error handler
+    if (err) { return next(err); }
+    // splice out the deleted review from course.reviews array
+    course.reviews.splice(course.reviews.indexOf(req.params.id), 1);
+    // splice out the deleted review user from course.usersWhoReviewed array
+    course.usersWhoReviewed.splice(course.usersWhoReviewed.indexOf(req.user), 1);
+    // save the course
+    course.save(function (err) {
+      // if error send to error handler
+      if (err) { return next(err); }
+    });
+  });
+
+  // send 204 status
+  res.status(204);
+  res.end();
+});
+
+
+module.exports = router;
