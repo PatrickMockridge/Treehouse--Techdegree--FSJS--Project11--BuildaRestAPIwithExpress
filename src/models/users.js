@@ -26,7 +26,7 @@ var UserSchema = new mongoose.Schema({
   toObject: { virtuals: true },
   toJSON: { virtuals: true }
 });
-// hash password before saving
+// hash password before saving from temporary virtual password value in Schema
 UserSchema.virtual('password')
 .get(function() {
   return this._password;
@@ -36,7 +36,7 @@ UserSchema.virtual('password')
   var salt = bcrypt.genSaltSync(12);
   this.hashedPassword = bcrypt.hashSync(value, salt);
 });
-
+// create 'confirm password' value in the schema 
 UserSchema.virtual('confirmPassword')
 .get(function() {
   return this._confirmPassword;
