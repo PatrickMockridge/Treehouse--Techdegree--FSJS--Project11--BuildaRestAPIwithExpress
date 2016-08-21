@@ -13,9 +13,9 @@ var auth = require('../auth.js');
 router.param('id', function (req, res, next, id) {
 // finds courses and populates with associated reviews
 Course.findById(id).populate('reviews').exec(function (err, course) {
-  //handles errors
+  // handles errors
     if (err) { return next(err); }
-    //if course not found
+    // if course not found
     if (!course) {
       return next(new Error('Course does not exist'));
     }
@@ -49,7 +49,7 @@ router.get('/courses/:id', function (req, res, next) {
     if (err) {
       return next(err);
     }
-    //formats data to be consumed by Angular
+    // formats data to be consumed by Angular
     var thisCourse = {};
     thisCourse.data = [];
     thisCourse.data.push(course);
@@ -96,7 +96,7 @@ router.post('/courses', auth, function (req, res, next) {
 
 
 router.put('/courses/:id', auth, function (req, res, next) {
-
+  // update message
   req.course.update(req.body, { runValidators: true }, function (err, course) {
     // if error
     if (err) {

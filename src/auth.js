@@ -1,40 +1,39 @@
 
 'use strict';
+
 var User = require('./models/users');
 var basicAuth = require('basic-auth');
 var bcrypt = require('bcrypt');
 var auth = function (req, res, next) {
-// send unauthorised status
+
   function unauthorised (res) {
-    // unauthorised response sent 
+    // res. send unauthorised
     return res.send(401);
   }
-
-  // uses basic-auth to to parse authorization requests
+  // parse the Authorization header credentials
   var user = basicAuth(req);
-
-  // if credentials not present
+  // if the user doesn't exist exist nor user.name nor user.pass
   if (!user || !user.name || !user.pass) {
-    // unauthorised
+    // return unauthorised
     return unauthorised(res);
   } else {
-    // else qury the db for the user email
+    // query user by email
     User.findOne({emailAddress: user.name}, function (err, email) {
-      // if error, handle error
+      // handle error
       if (err) return next(err);
-      // if email response
+      // if user exists
       if (email) {
-        // compare the password with the hashed password using bCrypt
+        // use bcrypt to compare given password with hashed password in the DB
         if (bcrypt.compareSync(user.pass, email.hashedPassword)) {
           // if true store the email in req.user & pass it to the next handler
           req.user = email;
           return next();
         } else {
-          // else unauthorised
+          // else return unauthorised
           return unauthorised(res);
         }
       } else {
-        // if query returns null: unauthorised
+        // if user doesn't exist in the DB
         return unauthorised(res);
       }
     });

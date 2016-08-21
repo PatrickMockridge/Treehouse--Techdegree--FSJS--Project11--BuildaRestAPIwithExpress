@@ -67,12 +67,10 @@ router.delete('/courses/:courseId/reviews/:id', auth, function (req, res, next) 
       // if error send to error handler
       if (err) { return next(err); }
     });
+    // send 204 status
+    res.status(204);
+    res.end();
   });
-
-  // send 204 status
-  res.status(204);
-  res.end();
 });
-
 
 module.exports = router;
