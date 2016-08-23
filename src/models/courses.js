@@ -32,16 +32,8 @@ var CourseSchema = new mongoose.Schema({
   reviews: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Review'
-  }],
-  usersWhoReviewed: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
   }]
-},
-  {
-    toObject: { virtuals: true },
-    toJSON: { virtuals: true }
-  });
+});
 // ensure that course contains at least one step
 CourseSchema.path('steps').validate(function (steps) {
   if (!steps) {

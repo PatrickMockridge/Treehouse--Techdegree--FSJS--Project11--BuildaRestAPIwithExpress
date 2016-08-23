@@ -28,27 +28,26 @@ router.post('/users', function (req, res, next) {
   user.save(function (err) {
     // if errors
     if (err) {
-      // check for validation errors
-      if (err.name === 'ValidationError') {
-        var errorArray = [];
-        for (var error in err.errors) {
-          errorArray.push({
-            code: 400,
-            message: err.errors[error].message
-          });
-        }
-        // format the errors to be consumed by the Angular front end
-        var errorMessages = {
-          message: 'Validation Failed',
-          errors: { property: errorArray }
-        };
-        // send error response
-        return res.status(400).json(errorMessages);
-      } else {
-        // else send error to error handler
-        return next(err);
-      }
+      var errorMessages = {
+        message: 'Validation Failed',
+        errors: {}
+      };
+      // handle validation errors
+        if (err.name === 'ValidationError') {
+          for (var error in err.errors) {
+            errorMessages.errors[error] = [{
+              code: 400,
+              message: err.errors[error].message
+            }];
+          }
+          console.log(errorMessages);
+          return res.status(400).json(errorMessages);
+        } else {
+          // else send error to error handler
+          return next(err);
     }
+  }
+
     res.status(201);
     res.location('/');
     res.end();

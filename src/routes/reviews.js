@@ -11,14 +11,12 @@ router.post('/courses/:courseId/reviews', auth, function (req, res, next) {
   review.user = req.user;
   // find one course with specific course id
   // return only reviews & usersWhoReviewed
-  Course.findOne({_id: req.params.courseId}, 'reviews usersWhoReviewed', function (err, course) {
+  Course.findOne({_id: req.params.courseId}, 'reviews', function (err, course) {
     // if error send to the error handler
     if (err) { return next(err); }
       // else push the new review into Course.reviews
       course.reviews.push(review);
       // make sure the user cannot write another review
-      course.usersWhoReviewed.push(review.user);
-      // save the course
       course.save(function (err) {
         // if error pass to error handler
         if (err) { return next(err); }
@@ -48,20 +46,25 @@ router.post('/courses/:courseId/reviews', auth, function (req, res, next) {
 
 // DELETE /api/courses/:courseId/reviews/:id 204 - Deletes the specified review and returns no content
 router.delete('/courses/:courseId/reviews/:id', auth, function (req, res, next) {
-  // remove the review that matches the id in url
-  Review.remove({_id: req.params.id}, function (err) {
-    // if error send to error handler
-    if (err) { return next(err); }
-  });
+  // create a promise to prevent users who didn't create the review from deleting them
+   var reviewAuth = Review.findOne({_id: req.params.id}, function (err, review) {
+  //   // if error send to error handler
+     if (err) { return next(err); }
+     console.log(req.user);
+     console.log(review);
+       if (req.user._id !== review.user) {
+         res.send(401);
+         res.end();
+         return
+       }
+   });
   // find specific course that matches course id in url
   // return only reviews & usersWhoReviewed
-  Course.findOne({_id: req.params.courseId}, 'reviews usersWhoReviewed', function (err, course) {
+  reviewAuth.then(Course.findOne({_id: req.params.courseId}, 'reviews', function (err, course) {
     // if error send to error handler
     if (err) { return next(err); }
     // splice out the deleted review from course.reviews array
     course.reviews.splice(course.reviews.indexOf(req.params.id), 1);
-    // splice out the deleted review user from course.usersWhoReviewed array
-    course.usersWhoReviewed.splice(course.usersWhoReviewed.indexOf(req.user), 1);
     // save the course
     course.save(function (err) {
       // if error send to error handler
@@ -70,7 +73,9 @@ router.delete('/courses/:courseId/reviews/:id', auth, function (req, res, next) 
     // send 204 status
     res.status(204);
     res.end();
-  });
+  })
+  );
 });
+
 
 module.exports = router;

@@ -21,11 +21,12 @@ var UserSchema = new mongoose.Schema({
     type: String,
     required: true
   }
-},
-{
-  toObject: { virtuals: true },
-  toJSON: { virtuals: true }
 });
+//,
+//{
+  //toObject: { virtuals: true },
+  //toJSON: { virtuals: true }
+//});
 // hash password before saving from temporary virtual password value in Schema
 UserSchema.virtual('password')
 .get(function() {
@@ -51,7 +52,7 @@ UserSchema.path('hashedPassword').validate(function(v) {
       this.invalidate('confirmPassword', 'the password fields must match');
     }
   }
-  // if no password invalidate 
+  // if no password invalidate
   if (this.isNew && !this._password) {
     this.invalidate('password', 'a password is required');
   }

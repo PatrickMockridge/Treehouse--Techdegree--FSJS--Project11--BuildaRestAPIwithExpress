@@ -28,7 +28,7 @@ Course.findById(id).populate('reviews').exec(function (err, course) {
 // gets all courses
 router.get('/courses', function (req, res, next) {
   // returns _id title and reviews
-  Course.find({}, '_id title reviews', function (err, courses) {
+  Course.find({}, '_id title', function (err, courses) {
     if (err) return next(err);
     //formats data to be consumed by the Angular app
     var allCourses = {};
@@ -55,32 +55,30 @@ router.get('/courses/:id', function (req, res, next) {
     thisCourse.data.push(course);
     res.json(thisCourse);
   });
+
 });
 
 router.post('/courses', auth, function (req, res, next) {
   // create new Course using req.body
   var course = new Course(req.body);
   // push current user to usersWhoReviewed so user cannot review their own course
-  course.usersWhoReviewed.push(req.user);
   // save the course
   course.save(function (err) {
     // if errors
     if (err) {
+      var errorMessages = {
+        message: 'Validation Failed',
+        errors: {}
+      };
       // handle validation errors
         if (err.name === 'ValidationError') {
-          var errorArray = [];
           for (var error in err.errors) {
-            errorArray.push({
+            errorMessages.errors[error] = [{
               code: 400,
               message: err.errors[error].message
-            });
+            }];
           }
-          // format the errors to be consumed by the Angular front end
-          var errorMessages = {
-            message: 'Validation Failed',
-            errors: { property: errorArray }
-          };
-          // send error response
+          console.log(errorMessages);
           return res.status(400).json(errorMessages);
         } else {
           // else send error to error handler
@@ -96,31 +94,33 @@ router.post('/courses', auth, function (req, res, next) {
 
 
 router.put('/courses/:id', auth, function (req, res, next) {
-  // update message
   req.course.update(req.body, { runValidators: true }, function (err, course) {
+    // if the user is not the one who made the course
+    if (req.user._id !== req.body.user._id) {
+      //unauthorised
+      res.send(401);
+    };
     // if error
     if (err) {
+      var errorMessages = {
+        message: 'Validation Failed',
+        errors: {}
+      };
       // handle validation errors
         if (err.name === 'ValidationError') {
-          var errorArray = [];
           for (var error in err.errors) {
-            errorArray.push({
+            errorMessages.errors[error] = [{
               code: 400,
               message: err.errors[error].message
-            });
-        }
-          // format the errors to be consumed by the Angular front end
-          var errorMessages = {
-            message: 'Validation Failed',
-            errors: { property: errorArray }
-          };
-          // send error response
+            }];
+          }
+          console.log(errorMessages);
           return res.status(400).json(errorMessages);
         } else {
           // else send error to error handler
           return next(err);
     }
-  };
+  }
     // send 204 status
     res.status(204);
     res.end();
