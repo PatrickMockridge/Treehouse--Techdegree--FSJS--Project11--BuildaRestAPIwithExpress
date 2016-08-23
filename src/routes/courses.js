@@ -99,6 +99,7 @@ router.put('/courses/:id', auth, function (req, res, next) {
     if (req.user._id !== req.body.user._id) {
       //unauthorised
       res.send(401);
+      res.end();
     };
     // if error
     if (err) {
