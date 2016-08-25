@@ -34,6 +34,18 @@ var CourseSchema = new mongoose.Schema({
     ref: 'Review'
   }]
 });
+
+// pre-save, create step numbers
+CourseSchema.pre('save', function(next) {
+  var course = this;
+  for (var i = 0; i<course.steps.length; i++) {
+    course.steps[i].stepNumber = i + 1;
+  }
+  next();
+});
+
+
+
 // ensure that course contains at least one step
 CourseSchema.path('steps').validate(function (steps) {
   if (!steps) {

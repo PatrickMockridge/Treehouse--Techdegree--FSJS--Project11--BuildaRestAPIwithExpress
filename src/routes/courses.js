@@ -94,9 +94,13 @@ router.post('/courses', auth, function (req, res, next) {
 
 
 router.put('/courses/:id', auth, function (req, res, next) {
+  for (var i = 0; i<req.body.steps.length; i++) {
+    req.body.steps[i].stepNumber = i + 1;
+  }
   req.course.update(req.body, { runValidators: true }, function (err, course) {
+    console.log(req.body);
     // if the user is not the one who made the course
-    if (req.user._id !== req.body.user._id) {
+    if (req.user._id != req.body.user._id) {
       //unauthorised
       res.send(401);
       res.end();
